@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status, generics, filters
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.generics import ListAPIView
 from .models import User, Post, Comment, PasswordSingleton, PasswordClass, PasswordFactory
 from .serializers import UserSerializer, PostSerializer, CommentSerializer
 from django.contrib.auth.hashers import make_password, check_password 
@@ -176,6 +177,24 @@ class ProtectedView(APIView):
 
     def get(self, request):
         return Response({"message": "Authenticated!"})
+
+# For the newsfeed feature
+class NewsFeedView(ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = None 
+
+    def get_queryset(self):
+        user = self.request.user
+        cache_key = f'user_{user.id}_feed'
+        posts = cache.get(cache_key)
+
+        if not posts:
+            posts = Post.objects.all().order_by('-created_at')  # Sorted by date (newest first)
+            cache.set(cache_key, posts, timeout=60 * 5)  # cache for 5 minutes
+
+        return posts
+
 
 # Create your views here.
 # def get_users(request):

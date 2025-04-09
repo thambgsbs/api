@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import UserListCreate, PostListCreate, CommentListCreate
 from rest_framework_simplejwt.views import (TokenRefreshView, TokenObtainPairView)
-from .views import ProtectedView
+from .views import ProtectedView, NewsFeedView
 
 urlpatterns = [
     path('users/', UserListCreate.as_view(), name='user-list-create'),
@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('protected/', ProtectedView.as_view(), name='protected-view'),
+    path('feed/', NewsFeedView.as_view(), name='news-feed'),
 ]
 
 
